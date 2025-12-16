@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Shell Script",
+            "type": "node", // Or "node", "python", etc., depending on your debugger extension
+            "request": "launch",
+            "program": "${workspaceFolder}/launch.sh", // Path to your .sh file
+            "args": [],
+            "cwd": "${workspaceFolder}", // Working directory for the script
+            "console": "integratedTerminal" // Or "internalConsole", "externalTerminal"
+        }
+    ]
+}
