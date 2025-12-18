@@ -1,20 +1,13 @@
 #include <ncursesw/ncurses.h>
 #include <windows.h>
-
+#include <string>
+using namespace std;
+// function declaration
 void setup();
 void drawTemplate();
-
-int main(void)
-{
-    setup();
-    
-    move(2,2);
-    printw("Welcome to unnamed terminal UI I made");
-    refresh();
-    Sleep(5000);
-    endwin();
-    return 0;
-}
+void programSelect(int selected);
+// variable declaration
+boolean active = true;
 enum
 {
 
@@ -31,8 +24,39 @@ enum
     WARNING = 12,
     INFO = 13,
     STANDARD = 14,
+    SELECTED = 15,
 
 };
+string commandList[5] = {
+    "EXIT",
+    "TEST PROGRAM 1",
+    "TEST PROGRAM 2",
+    "TEST PROGRAM 3",
+    "TEST PROGRAM 4"};
+
+// main function
+int main(void)
+{
+    setup();
+    move(2, 2);
+    printw("Welcome to unnamed terminal UI I made\n");
+    while (active)
+    {
+        programSelect(0);
+    }
+    return 0;
+}
+
+// UI functions
+void programSelect(int selected)
+{
+    move(LINES - 4, 2);
+    string buffer = commandList[0];
+    attron(COLOR_PAIR(SELECTED));
+    printw("%s", buffer.c_str());
+    refresh();
+}
+
 void setup()
 {
     initscr();
@@ -53,6 +77,7 @@ void setup()
     init_pair(MAGENTA, COLOR_MAGENTA, COLOR_MAGENTA);
     init_pair(CYAN, COLOR_CYAN, COLOR_CYAN);
     init_pair(WHITE, COLOR_WHITE, COLOR_WHITE);
+    init_pair(SELECTED, COLOR_BLACK, COLOR_CYAN);
     drawTemplate();
 }
 
@@ -80,7 +105,7 @@ void drawTemplate()
             attroff(COLOR_PAIR(BLACK));
         }
     }
-    for (int y = 5; y < LINES-1; y++)
+    for (int y = 5; y < LINES - 1; y++)
     {
         move(y, 1);
         for (int x = 0; x < COLS - 2; x++)
@@ -91,4 +116,9 @@ void drawTemplate()
             attroff(COLOR_PAIR(BLACK));
         }
     }
+}
+
+// execution function
+void funcCaller(int funcToCall)
+{
 }
