@@ -1,14 +1,17 @@
 #include <ncursesw/ncurses.h>
+#include <windows.h>
 
 void setup();
-void printHome();
+void drawTemplate();
 
 int main(void)
 {
     setup();
-    printHome();
+    
+    move(2,2);
+    printw("Welcome to unnamed terminal UI I made");
     refresh();
-    getch();
+    Sleep(5000);
     endwin();
     return 0;
 }
@@ -23,7 +26,7 @@ enum
     MAGENTA = 5,
     CYAN = 6,
     WHITE = 7,
-    ERROR = 10,
+    FAIL = 10,
     SUCCESS = 11,
     WARNING = 12,
     INFO = 13,
@@ -35,6 +38,9 @@ void setup()
     initscr();
     start_color();
     use_default_colors();
+    cbreak();
+    curs_set(0);
+    keypad(stdscr, TRUE);
     init_pair(ERROR, COLOR_MAGENTA, COLOR_RED);
     init_pair(SUCCESS, COLOR_CYAN, COLOR_GREEN);
     init_pair(WARNING, COLOR_RED, COLOR_YELLOW);
@@ -47,29 +53,42 @@ void setup()
     init_pair(MAGENTA, COLOR_MAGENTA, COLOR_MAGENTA);
     init_pair(CYAN, COLOR_CYAN, COLOR_CYAN);
     init_pair(WHITE, COLOR_WHITE, COLOR_WHITE);
+    drawTemplate();
 }
 
-void printHome()
+void drawTemplate()
 {
-    for (int x = 0; x < COLS; x++)
+    for (int y = 0; y < LINES; y++)
     {
-        for (int y = 0; y < 5; y++)
+        for (int x = 0; x < COLS; x++)
         {
-            init_pair(ERROR, COLOR_MAGENTA, COLOR_RED);
-            init_pair(SUCCESS, COLOR_CYAN, COLOR_GREEN);
-            init_pair(1, COLOR_RED, COLOR_YELLOW);
-            init_pair(INFO, COLOR_CYAN, COLOR_BLUE);
-            init_pair(STANDARD, COLOR_BLACK, COLOR_WHITE);
-            init_pair(BLACK, COLOR_BLACK, COLOR_BLACK);
-            init_pair(RED, COLOR_RED, COLOR_RED);
-            init_pair(GREEN, COLOR_GREEN, COLOR_GREEN);
-            init_pair(YELLOW, COLOR_YELLOW, COLOR_YELLOW);
-            init_pair(MAGENTA, COLOR_MAGENTA, COLOR_MAGENTA);
-            init_pair(CYAN, COLOR_CYAN, COLOR_CYAN);
-            init_pair(WHITE, COLOR_WHITE, COLOR_WHITE);
-            attron(1);
-            printw("g");
+            attron(COLOR_PAIR(WHITE));
+            printw(" ");
             refresh();
+            attroff(COLOR_PAIR(WHITE));
+        }
+    }
+
+    for (int y = 1; y < 4; y++)
+    {
+        move(y, 1);
+        for (int x = 0; x < COLS - 2; x++)
+        {
+            attron(COLOR_PAIR(BLACK));
+            printw(" ");
+            refresh();
+            attroff(COLOR_PAIR(BLACK));
+        }
+    }
+    for (int y = 5; y < LINES-1; y++)
+    {
+        move(y, 1);
+        for (int x = 0; x < COLS - 2; x++)
+        {
+            attron(COLOR_PAIR(BLACK));
+            printw(" ");
+            refresh();
+            attroff(COLOR_PAIR(BLACK));
         }
     }
 }
