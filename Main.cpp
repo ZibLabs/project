@@ -6,8 +6,10 @@ using namespace std;
 void setup();
 void drawTemplate();
 void programSelect(int selected);
+void clearBox();
 // variable declaration
 boolean active = true;
+int selectNum = 0;
 enum
 {
 
@@ -28,21 +30,47 @@ enum
 
 };
 string commandList[5] = {
-    "EXIT",
-    "TEST PROGRAM 1",
-    "TEST PROGRAM 2",
-    "TEST PROGRAM 3",
-    "TEST PROGRAM 4"};
+    "EXIT", //0
+    "TEST PROGRAM 1", //1
+    "TEST PROGRAM 2", //2
+    "TEST PROGRAM 3", //3
+    "TEST PROGRAM 4"}; //4
 
 // main function
 int main(void)
 {
     setup();
     move(2, 2);
-    printw("Welcome to unnamed terminal UI I made\n");
+    printw("Welcome to unnamed terminal UI I made");
     while (active)
     {
-        programSelect(0);
+        move(LINES - 5, 2);
+
+        int ch = getch();
+        switch (ch)
+        {
+        case KEY_UP:
+            selectNum += 1;
+            break;
+        case KEY_DOWN:
+            selectNum -= 1;
+            break;
+        default:
+            break;
+        }
+        move(1,2);
+        printw(""+selectNum);
+        if (selectNum > 4)
+        {
+            selectNum = 0;
+        }
+        if (selectNum < 0)
+        {
+            selectNum = 4;
+        }
+
+        clearBox();
+        programSelect(selectNum - 1);
     }
     return 0;
 }
@@ -51,9 +79,10 @@ int main(void)
 void programSelect(int selected)
 {
     move(LINES - 4, 2);
-    string buffer = commandList[0];
+    string buffer = commandList[selected];
     attron(COLOR_PAIR(SELECTED));
     printw("%s", buffer.c_str());
+    attroff(COLOR_PAIR(SELECTED));
     refresh();
 }
 
@@ -105,6 +134,11 @@ void drawTemplate()
             attroff(COLOR_PAIR(BLACK));
         }
     }
+    clearBox();
+}
+
+void clearBox()
+{
     for (int y = 5; y < LINES - 1; y++)
     {
         move(y, 1);
@@ -116,9 +150,4 @@ void drawTemplate()
             attroff(COLOR_PAIR(BLACK));
         }
     }
-}
-
-// execution function
-void funcCaller(int funcToCall)
-{
 }
