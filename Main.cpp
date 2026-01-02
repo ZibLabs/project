@@ -1,5 +1,5 @@
 #include <ncursesw/ncurses.h>
-#include <windows.h>
+//#include <windows.h>
 #include <string>
 using namespace std;
 // function declaration
@@ -8,7 +8,7 @@ void drawTemplate();
 void programSelect(int selected);
 void clearBox();
 // variable declaration
-boolean active = true;
+bool active = true;
 int selectNum = 0;
 enum
 {
@@ -59,7 +59,7 @@ int main(void)
             break;
         }
         move(1,2);
-        printw(""+selectNum);
+        printw("%d",selectNum);
         if (selectNum > 4)
         {
             selectNum = 0;
@@ -70,7 +70,7 @@ int main(void)
         }
 
         clearBox();
-        programSelect(selectNum - 1);
+        programSelect(selectNum);
     }
     return 0;
 }
@@ -94,7 +94,7 @@ void setup()
     cbreak();
     curs_set(0);
     keypad(stdscr, TRUE);
-    init_pair(ERROR, COLOR_MAGENTA, COLOR_RED);
+    init_pair(FAIL, COLOR_MAGENTA, COLOR_RED);
     init_pair(SUCCESS, COLOR_CYAN, COLOR_GREEN);
     init_pair(WARNING, COLOR_RED, COLOR_YELLOW);
     init_pair(INFO, COLOR_CYAN, COLOR_BLUE);
@@ -118,7 +118,6 @@ void drawTemplate()
         {
             attron(COLOR_PAIR(WHITE));
             printw(" ");
-            refresh();
             attroff(COLOR_PAIR(WHITE));
         }
     }
@@ -130,11 +129,11 @@ void drawTemplate()
         {
             attron(COLOR_PAIR(BLACK));
             printw(" ");
-            refresh();
             attroff(COLOR_PAIR(BLACK));
         }
     }
     clearBox();
+    refresh();
 }
 
 void clearBox()
@@ -146,7 +145,6 @@ void clearBox()
         {
             attron(COLOR_PAIR(BLACK));
             printw(" ");
-            refresh();
             attroff(COLOR_PAIR(BLACK));
         }
     }
