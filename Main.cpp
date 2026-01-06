@@ -1,5 +1,4 @@
 #include <ncursesw/ncurses.h>
-//#include <windows.h>
 #include <string>
 using namespace std;
 // function declaration
@@ -7,6 +6,11 @@ void setup();
 void drawTemplate();
 void programSelect(int selected);
 void clearBox();
+void execute(int selected);
+void game();
+void clock();
+void typewriter();
+void calibrate();
 // variable declaration
 bool active = true;
 int selectNum = 0;
@@ -31,11 +35,12 @@ enum
 };
 string commandList[5] = {
     "EXIT", //0
-    "TEST PROGRAM 1", //1
-    "TEST PROGRAM 2", //2
-    "TEST PROGRAM 3", //3
-    "TEST PROGRAM 4"}; //4
+    "GAME", //1
+    "CLOCK", //2
+    "TYPEWRITER", //3
+    "SIZE CALIBRATION TOOL"}; //4
 
+// defines programs 
 // main function
 int main(void)
 {
@@ -46,6 +51,7 @@ int main(void)
     {
         move(LINES - 5, 2);
 
+        programSelect(selectNum);
         int ch = getch();
         switch (ch)
         {
@@ -55,11 +61,11 @@ int main(void)
         case KEY_DOWN:
             selectNum -= 1;
             break;
+        case 10:
+            execute(selectNum);
         default:
             break;
         }
-        move(1,2);
-        printw("%d",selectNum);
         if (selectNum > 4)
         {
             selectNum = 0;
@@ -148,4 +154,26 @@ void clearBox()
             attroff(COLOR_PAIR(BLACK));
         }
     }
+}
+
+// selects and runs func for program
+void execute(int selected){
+    switch (selected)
+    {
+    case 0:
+        endwin();
+        exit(0);
+        break;
+    case 1:
+        game();
+        break;
+    
+    default:
+        printw("Not implimented yet");
+        break;
+    }
+}
+// programs
+void game(){
+    clearBox();
 }
