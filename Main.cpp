@@ -34,13 +34,13 @@ enum
 
 };
 string commandList[5] = {
-    "EXIT", //0
-    "GAME", //1
-    "CLOCK", //2
-    "TYPEWRITER", //3
-    "SIZE CALIBRATION TOOL"}; //4
+    "EXIT",                   // 0
+    "GAME",                   // 1
+    "CLOCK",                  // 2
+    "TYPEWRITER",             // 3
+    "SIZE CALIBRATION TOOL"}; // 4
 
-// defines programs 
+// defines programs
 // main function
 int main(void)
 {
@@ -99,6 +99,7 @@ void setup()
     use_default_colors();
     cbreak();
     curs_set(0);
+    nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     init_pair(FAIL, COLOR_MAGENTA, COLOR_RED);
     init_pair(SUCCESS, COLOR_CYAN, COLOR_GREEN);
@@ -157,7 +158,8 @@ void clearBox()
 }
 
 // selects and runs func for program
-void execute(int selected){
+void execute(int selected)
+{
     switch (selected)
     {
     case 0:
@@ -167,13 +169,36 @@ void execute(int selected){
     case 1:
         game();
         break;
-    
+    case 4:
+        calibrate();
+        break;
     default:
         printw("Not implimented yet");
         break;
     }
 }
 // programs
-void game(){
+void game()
+{
     clearBox();
+    bool active = true;
+    int playery = LINES-4;
+    while (active)
+    {
+        int ch = getch();
+        switch (ch)
+        {
+        case 'q':
+            active = false;
+            break;
+        case KEY_UP:
+            break;
+        }
+        move(playery, 2);
+        printw("#");
+    }
 }
+void calibrate(){
+
+}
+
