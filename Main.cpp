@@ -180,11 +180,16 @@ void execute(int selected)
 // programs
 void game()
 {
+    int top = 5;
+    int bottom = LINES - 2;
+    int playery = (top + bottom) / 2;
+    int boundWidth = COLS - 2;
+    int boundHeight = bottom-top;
     clearBox();
     bool active = true;
-    int playery = LINES-4;
     while (active)
     {
+        //calculations and input
         int ch = getch();
         switch (ch)
         {
@@ -192,13 +197,34 @@ void game()
             active = false;
             break;
         case KEY_UP:
+            if (playery - 3 > top)
+            {
+                playery--;
+            }
+            break;
+        case KEY_DOWN:
+            if (playery + 3 < bottom)
+            {
+                playery++;
+            }
             break;
         }
-        move(playery, 2);
-        printw("#");
+        clearBox();
+
+        //printing all details to user
+        attron(COLOR_PAIR(YELLOW));
+        for (int y = -3;y <=3;y++){
+        move(playery + y, 2);
+        printw("  ");
+        }
+        attroff(COLOR_PAIR(YELLOW));
+        for (int y = 0;y < boundHeight;y++){
+            move(top+y,COLS/2);
+            printw("|");
+        }
+        
     }
 }
-void calibrate(){
-
+void calibrate()
+{
 }
-
