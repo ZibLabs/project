@@ -109,6 +109,7 @@ void setup()
     init_pair(BLACK, COLOR_BLACK, COLOR_BLACK);
     init_pair(RED, COLOR_RED, COLOR_RED);
     init_pair(GREEN, COLOR_GREEN, COLOR_GREEN);
+    init_pair(BLUE, COLOR_BLUE, COLOR_BLUE);
     init_pair(YELLOW, COLOR_YELLOW, COLOR_YELLOW);
     init_pair(MAGENTA, COLOR_MAGENTA, COLOR_MAGENTA);
     init_pair(CYAN, COLOR_CYAN, COLOR_CYAN);
@@ -184,12 +185,21 @@ void game()
     int bottom = LINES - 2;
     int playery = (top + bottom) / 2;
     int boundWidth = COLS - 2;
-    int boundHeight = bottom-top;
+    int boundHeight = bottom - top;
+    int middleX = COLS / 2;
+    int middleY = (top + bottom) / 2;
+    int ballX = middleX;
+    int ballY = middleY;
+    int ballXVel = (rand() % 2 == 0) ? 1 : -1;
+    int ballYVel = (rand() % 2 == 0) ? 1 : -1;
+
+    int frameLimit = 500;
+    int frame = 0;
     clearBox();
     bool active = true;
     while (active)
     {
-        //calculations and input
+        // calculations and input
         int ch = getch();
         switch (ch)
         {
@@ -211,18 +221,55 @@ void game()
         }
         clearBox();
 
-        //printing all details to user
+        // printing all details to user
         attron(COLOR_PAIR(YELLOW));
-        for (int y = -3;y <=3;y++){
-        move(playery + y, 2);
-        printw("  ");
+        for (int y = -3; y <= 3; y++)
+        {
+            move(playery + y, 2);
+            printw("  ");
         }
         attroff(COLOR_PAIR(YELLOW));
-        for (int y = 0;y < boundHeight;y++){
-            move(top+y,COLS/2);
+        for (int y = 0; y < boundHeight + 1; y++)
+        {
+            move(top + y, COLS / 2);
             printw("|");
         }
-        
+        // frame limiter for ball phyisics
+        if (frame >= frameLimit)
+        {
+            // ball physics
+            ballX += ballXVel;
+            ballY += ballYVel;
+            if (ballY <= top + 1 || ballY >= bottom - 1)
+            {
+                ballYVel *= -1; // reverse vertical direction
+            }
+            if (ballX <= 1 || ballX >= boundWidth)
+            {
+                ballXVel *= -1; // reverse horizontal direction
+                frameLimit += 50;
+            }
+            frame = 0;
+            if (ballX <= 5)
+            {
+                if (ballY >= playery - 3 && ballY <= playery + 3)
+                {
+                    ballXVel *= -1; // boing
+                    frameLimit -= 100;
+                }
+            }
+        }
+        frame++;
+        attron(COLOR_PAIR(CYAN));
+        for (int y = -1; y <= 1; y++)
+        {
+            for (int x = -1; x <= 1; x++)
+            {
+                move(ballY + y, ballX + x);
+                printw(" ");
+            }
+        }
+        attroff(COLOR_PAIR(CYAN));
     }
 }
 void calibrate()
