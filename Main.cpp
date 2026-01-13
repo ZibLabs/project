@@ -183,7 +183,8 @@ void game()
 {
     int top = 5;
     int bottom = LINES - 2;
-    int playery = (top + bottom) / 2;
+    int player1y = (top + bottom) / 2;
+    int player2y = (top + bottom) / 2;
     int boundWidth = COLS - 2;
     int boundHeight = bottom - top;
     int middleX = COLS / 2;
@@ -207,15 +208,15 @@ void game()
             active = false;
             break;
         case KEY_UP:
-            if (playery - 3 > top)
+            if (player1y - 3 > top)
             {
-                playery--;
+                player1y--;
             }
             break;
         case KEY_DOWN:
-            if (playery + 3 < bottom)
+            if (player1y + 3 < bottom)
             {
-                playery++;
+                player1y++;
             }
             break;
         }
@@ -225,10 +226,22 @@ void game()
         attron(COLOR_PAIR(YELLOW));
         for (int y = -3; y <= 3; y++)
         {
-            move(playery + y, 2);
+            move(player1y + y, 2);
             printw("  ");
         }
         attroff(COLOR_PAIR(YELLOW));
+
+        attron(COLOR_PAIR(YELLOW));
+        for (int y = -3; y <= 3; y++)
+        {
+            move(player2y + y, COLS - 4);
+            printw("  ");
+        }
+        attroff(COLOR_PAIR(YELLOW));
+
+        
+
+
         for (int y = 0; y < boundHeight + 1; y++)
         {
             move(top + y, COLS / 2);
@@ -247,15 +260,14 @@ void game()
             if (ballX <= 1 || ballX >= boundWidth)
             {
                 ballXVel *= -1; // reverse horizontal direction
-                frameLimit += 50;
             }
             frame = 0;
             if (ballX <= 5)
             {
-                if (ballY >= playery - 3 && ballY <= playery + 3)
+                if (ballY >= player1y - 3 && ballY <= player1y + 3)
                 {
                     ballXVel *= -1; // boing
-                    frameLimit -= 100;
+                    frameLimit -= 10;
                 }
             }
         }
