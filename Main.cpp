@@ -1,5 +1,7 @@
 #include <ncursesw/ncurses.h>
 #include <string>
+#include <math.h>
+#include <ctime>
 using namespace std;
 // function declaration
 void setup();
@@ -8,7 +10,7 @@ void programSelect(int selected);
 void clearBox();
 void execute(int selected);
 void game();
-void clock();
+void menuClock();
 void typewriter();
 void calibrate();
 // variable declaration
@@ -45,8 +47,6 @@ string commandList[5] = {
 int main(void)
 {
     setup();
-    move(2, 2);
-    printw("Welcome to unnamed terminal UI I made");
     while (active)
     {
         move(LINES - 5, 2);
@@ -181,6 +181,7 @@ void execute(int selected)
 // programs
 void game()
 {
+    srand(time(0));
     int top = 5;
     int bottom = LINES - 2;
     int player1y = (top + bottom) / 2;
@@ -193,14 +194,15 @@ void game()
     int ballY = middleY;
     int ballXVel = (rand() % 2 == 0) ? 1 : -1;
     int ballYVel = (rand() % 2 == 0) ? 1 : -1;
-
-    int frameLimit = 500;
+    int p1Score = 0;
+    int p2Score = 0;
+    int botFrameLimit = 1000;
+    int ballFrameLimit = 250;
     int frame = 0;
     clearBox();
     bool active = true;
     while (active)
     {
-        // calculations and input
         int ch = getch();
         switch (ch)
         {
@@ -230,7 +232,19 @@ void game()
             printw("  ");
         }
         attroff(COLOR_PAIR(YELLOW));
+        if (frame % botFrameLimit == 0)
+        {
+            if (ballY > player2y && player2y + 3 < bottom)
+            {
+                player2y++;
+            }
+            if (ballY < player2y && player2y - 3 > top)
+            {
+                player2y--;
+            }
+        }
 
+        // prints players to screen
         attron(COLOR_PAIR(YELLOW));
         for (int y = -3; y <= 3; y++)
         {
@@ -239,39 +253,70 @@ void game()
         }
         attroff(COLOR_PAIR(YELLOW));
 
-        
-
-
         for (int y = 0; y < boundHeight + 1; y++)
         {
             move(top + y, COLS / 2);
             printw("|");
         }
+
         // frame limiter for ball phyisics
-        if (frame >= frameLimit)
+        if (frame % ballFrameLimit == 0)
         {
             // ball physics
             ballX += ballXVel;
             ballY += ballYVel;
             if (ballY <= top + 1 || ballY >= bottom - 1)
             {
-                ballYVel *= -1; // reverse vertical direction
+                ballYVel *= -1; // reverse vertical
             }
-            if (ballX <= 1 || ballX >= boundWidth)
+            if (ballX <= 1)
             {
-                ballXVel *= -1; // reverse horizontal direction
+                ballX = middleX;
+                ballY = middleY;
+                ballXVel = (rand() % 2 == 0) ? 1 : -1;
+                ballYVel = (rand() % 2 == 0) ? 1 : -1;
+                botFrameLimit += 100;
+                p2Score++;
             }
-            frame = 0;
+            if (ballX >= boundWidth - 1)
+            {
+                ballX = middleX;
+                ballY = middleY;
+                ballXVel = (rand() % 2 == 0) ? 1 : -1;
+                ballYVel = (rand() % 2 == 0) ? 1 : -1;
+                botFrameLimit -= 100;
+                p1Score++;
+            }
             if (ballX <= 5)
             {
                 if (ballY >= player1y - 3 && ballY <= player1y + 3)
                 {
                     ballXVel *= -1; // boing
-                    frameLimit -= 10;
+                    ballFrameLimit -= 10;
+                }
+            }
+            if (ballX >= boundWidth - 4)
+            {
+                if (ballY >= player2y - 3 && ballY <= player2y + 3)
+                {
+                    ballXVel *= -1; // boing
+                    ballFrameLimit -= 10;
                 }
             }
         }
+
+        // frame boundchecks
+        if (ballFrameLimit < 50)
+        {
+            ballFrameLimit = 50;
+        }
+        if (botFrameLimit < 50)
+        {
+            botFrameLimit = 50;
+        }
+
         frame++;
+        // prints ball to screen
         attron(COLOR_PAIR(CYAN));
         for (int y = -1; y <= 1; y++)
         {
@@ -282,6 +327,13 @@ void game()
             }
         }
         attroff(COLOR_PAIR(CYAN));
+        move(2, 2);
+        printw(
+            "Player score is %d. Bot score is %d. Ball frame limit is %d. Bot frame limit is %d",
+            p1Score,
+            p2Score,
+            ballFrameLimit,
+            botFrameLimit);
     }
 }
 void calibrate()
