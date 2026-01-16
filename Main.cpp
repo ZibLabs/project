@@ -2,19 +2,23 @@
 #include <string>
 #include <math.h>
 #include <ctime>
+#include <fstream>
+
 using namespace std;
 // function declaration
 void setup();
 void drawTemplate();
-void programSelect(int selected);
+void drawSelected(int selected);
 void clearBox();
 void execute(int selected);
 void game();
-void menuClock();
-void typewriter();
-void calibrate();
+void matrix();
+
+int highscore = 0;
+// resetMenu allows for a single redrawing when returning rather than repeating it in the while loop
+bool resetMenu = true;
+bool menuActive = true;
 // variable declaration
-bool active = true;
 int selectNum = 0;
 enum
 {
@@ -35,54 +39,61 @@ enum
     SELECTED = 15,
 
 };
-string commandList[5] = {
-    "EXIT",                   // 0
-    "GAME",                   // 1
-    "CLOCK",                  // 2
-    "TYPEWRITER",             // 3
-    "SIZE CALIBRATION TOOL"}; // 4
-
 // defines programs
+string commandList[3] = {
+    "EXIT",   // 0
+    "GAME",   // 1
+    "MATRIX", // 2
+};
+
 // main function
 int main(void)
 {
-    setup();
-    while (active)
+    while (menuActive)
     {
+        if (resetMenu)
+        {
+            setup();
+            resetMenu = false;
+        }
+        move(2, 2);
+        printw("Pong highscore: %d",
+               highscore);
         move(LINES - 5, 2);
 
-        programSelect(selectNum);
+        drawSelected(selectNum);
         int ch = getch();
         switch (ch)
         {
         case KEY_UP:
-            selectNum += 1;
+            selectNum--;
             break;
         case KEY_DOWN:
-            selectNum -= 1;
+            selectNum++;
             break;
         case 10:
             execute(selectNum);
+            break;
         default:
             break;
         }
-        if (selectNum > 4)
+        if (selectNum > 2)
         {
             selectNum = 0;
         }
         if (selectNum < 0)
         {
-            selectNum = 4;
+            selectNum = 2;
         }
 
         clearBox();
-        programSelect(selectNum);
+        drawSelected(selectNum);
     }
     return 0;
 }
 
 // UI functions
-void programSelect(int selected)
+void drawSelected(int selected)
 {
     move(LINES - 4, 2);
     string buffer = commandList[selected];
@@ -101,6 +112,8 @@ void setup()
     curs_set(0);
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
+    noecho();
+    leaveok(stdscr, TRUE);
     init_pair(FAIL, COLOR_MAGENTA, COLOR_RED);
     init_pair(SUCCESS, COLOR_CYAN, COLOR_GREEN);
     init_pair(WARNING, COLOR_RED, COLOR_YELLOW);
@@ -115,9 +128,11 @@ void setup()
     init_pair(CYAN, COLOR_CYAN, COLOR_CYAN);
     init_pair(WHITE, COLOR_WHITE, COLOR_WHITE);
     init_pair(SELECTED, COLOR_BLACK, COLOR_CYAN);
+    init_pair(111,COLOR_GREEN,COLOR_BLACK);
     drawTemplate();
 }
 
+// Clears screen and carves out UI boxes
 void drawTemplate()
 {
     for (int y = 0; y < LINES; y++)
@@ -164,17 +179,17 @@ void execute(int selected)
     switch (selected)
     {
     case 0:
+        menuActive = false;
         endwin();
         exit(0);
         break;
     case 1:
         game();
         break;
-    case 4:
-        calibrate();
+    case 2:
+        matrix();
         break;
     default:
-        printw("Not implimented yet");
         break;
     }
 }
@@ -194,10 +209,9 @@ void game()
     int ballY = middleY;
     int ballXVel = (rand() % 2 == 0) ? 1 : -1;
     int ballYVel = (rand() % 2 == 0) ? 1 : -1;
-    int p1Score = 0;
-    int p2Score = 0;
+    int score = 0;
     int botFrameLimit = 1000;
-    int ballFrameLimit = 250;
+    int ballFrameLimit = 500;
     int frame = 0;
     clearBox();
     bool active = true;
@@ -208,6 +222,11 @@ void game()
         {
         case 'q':
             active = false;
+            if (score > highscore)
+            {
+                highscore = score;
+            }
+            resetMenu = true;
             break;
         case KEY_UP:
             if (player1y - 3 > top)
@@ -275,8 +294,13 @@ void game()
                 ballY = middleY;
                 ballXVel = (rand() % 2 == 0) ? 1 : -1;
                 ballYVel = (rand() % 2 == 0) ? 1 : -1;
+                ballFrameLimit = 500;
                 botFrameLimit += 100;
-                p2Score++;
+                if (score > highscore)
+                {
+                    highscore = score;
+                }
+                score = 0;
             }
             if (ballX >= boundWidth - 1)
             {
@@ -284,15 +308,16 @@ void game()
                 ballY = middleY;
                 ballXVel = (rand() % 2 == 0) ? 1 : -1;
                 ballYVel = (rand() % 2 == 0) ? 1 : -1;
+                ballFrameLimit = 500;
                 botFrameLimit -= 100;
-                p1Score++;
+                score++;
             }
             if (ballX <= 5)
             {
                 if (ballY >= player1y - 3 && ballY <= player1y + 3)
                 {
                     ballXVel *= -1; // boing
-                    ballFrameLimit -= 10;
+                    ballFrameLimit -= 50;
                 }
             }
             if (ballX >= boundWidth - 4)
@@ -300,19 +325,19 @@ void game()
                 if (ballY >= player2y - 3 && ballY <= player2y + 3)
                 {
                     ballXVel *= -1; // boing
-                    ballFrameLimit -= 10;
+                    ballFrameLimit -= 50;
                 }
             }
         }
 
         // frame boundchecks
-        if (ballFrameLimit < 50)
+        if (ballFrameLimit < 10)
         {
-            ballFrameLimit = 50;
+            ballFrameLimit = 10;
         }
-        if (botFrameLimit < 50)
+        if (botFrameLimit < 100)
         {
-            botFrameLimit = 50;
+            botFrameLimit = 100;
         }
 
         frame++;
@@ -329,13 +354,102 @@ void game()
         attroff(COLOR_PAIR(CYAN));
         move(2, 2);
         printw(
-            "Player score is %d. Bot score is %d. Ball frame limit is %d. Bot frame limit is %d",
-            p1Score,
-            p2Score,
-            ballFrameLimit,
-            botFrameLimit);
+            "Score: %d. q to exit ",
+            score);
     }
 }
-void calibrate()
+void matrix()
 {
+    clearBox();
+    srand(time(0));
+    bool active = true;
+
+    const int NUM_LINE = 50;
+    int lineX[NUM_LINE];
+    int lineY[NUM_LINE];
+    int trailLength[NUM_LINE];
+    bool activeLine[NUM_LINE]; // track if the line is currently falling
+
+    // box boundaries
+    const int top = 5;
+    const int bottom = LINES - 2;
+    const int left = 1;
+    const int right = COLS - 3; 
+
+    // setup line positions and trails
+    for (int i = 0; i < NUM_LINE; i++)
+    {
+        lineX[i] = left + rand() % (right - left + 1);
+        lineY[i] = top;
+        trailLength[i] = 3 + rand() % 5;
+        activeLine[i] = false;
+    }
+
+    nodelay(stdscr, TRUE);
+
+    while (active)
+    {
+        int ch = getch();
+        if (ch == 'q')
+        {
+            active = false;
+            resetMenu = true;
+            break;
+        }
+
+        for (int i = 0; i < NUM_LINE; i++)
+        {
+            // randomly activate lines at top
+            if (!activeLine[i] && rand() % 100 < 5) // ~5% chance per frame
+            {
+                activeLine[i] = true;
+                lineY[i] = top;
+                lineX[i] = left + rand() % (right - left + 1);
+                trailLength[i] = 3 + rand() % 5;
+            }
+
+            if (activeLine[i])
+            {
+                // erase tail beyond trail length
+                int tailY = lineY[i] - trailLength[i];
+                if (tailY >= top)
+                {
+                    mvaddch(tailY, lineX[i], ' ');
+                }
+
+                // draw
+                for (int t = 0; t < trailLength[i]; t++)
+                {
+                    int y = lineY[i] - t;
+                    if (y >= top && y <= bottom)
+                    {
+                        char c = 33 + rand() % 94;
+                        attron(COLOR_PAIR(GREEN));
+                        mvaddch(y, lineX[i], c);
+                        attroff(COLOR_PAIR(GREEN));
+                    }
+                }
+
+                // move line down
+                lineY[i]++;
+
+                // reset if fully past bottom
+                if (lineY[i] - trailLength[i] > bottom)
+                {
+                    activeLine[i] = false;
+                }
+            }
+        }
+
+        move(2, 2);
+        printw(
+            "Press q to take the red pill and leave the matrix");
+        refresh();
+        napms(50);
+    }
+
+    nodelay(stdscr, FALSE);
 }
+
+
+
