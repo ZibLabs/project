@@ -1,3 +1,11 @@
+/*
+*Creator: Gabe Z
+*Use: Just a frame for a menu
+*I actually really enjoyed making the project and plan on addine more options later.
+*Arrow keys to navigate, enter to select.
+*/
+
+
 #include <ncursesw/ncurses.h>
 #include <string>
 #include <math.h>
@@ -57,7 +65,7 @@ int main(void)
             resetMenu = false;
         }
         move(2, 2);
-        printw("Pong highscore: %d",
+        printw("Pong highscore: %d. Use arrow keys to navigate and enter to select",
                highscore);
         move(LINES - 5, 2);
 
@@ -210,8 +218,8 @@ void game()
     int ballXVel = (rand() % 2 == 0) ? 1 : -1;
     int ballYVel = (rand() % 2 == 0) ? 1 : -1;
     int score = 0;
-    int botFrameLimit = 1000;
-    int ballFrameLimit = 500;
+    int botFrameLimit = 1000; //limits the refresh rate to make the bot beatable
+    int ballFrameLimit = 500; //limits the ball speed to make the game playable
     int frame = 0;
     clearBox();
     bool active = true;
@@ -358,6 +366,8 @@ void game()
             score);
     }
 }
+
+//note on the matrix project. I was sick and tired while i made this so the comments may not be the greatest
 void matrix()
 {
     clearBox();
